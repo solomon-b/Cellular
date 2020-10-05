@@ -10,27 +10,6 @@ cong2 Refl Refl = Refl
 funext : (f, g : a -> b) -> ((x : a) -> f x = g x) -> f = g
 funext f g = believe_me
 
-interface Comonad w => VerifiedComonad (w : Type -> Type) where
---extend extract = id
-  extendExtractId :
-    {a : Type} ->
-    (wa : w a) ->
-    extend Comonad.extract wa = wa
---extract . extend f  = f
-  extractExtendF :
-    {a, b : Type} ->
-    (wa : w a) ->
-    (x : b) ->
-    (f : w a -> b) ->
-    (Comonad.extract . extend f) wa = x
---extend f . extend g = extend (f . extend g)
-  extendExtend :
-    {a, b, c : Type} ->
-    (wa : w a) ->
-    (g : w a -> b) ->
-    (f : w b -> c) ->
-    (extend f . extend g) wa = extend (f . extend g) wa
-
 public export
 data Store : Type -> Type -> Type where
   Store' : (s -> a) -> s -> Store s a
@@ -47,11 +26,11 @@ export
 Comonad (Store s) where
   extract (Store' f s) = f s
   duplicate (Store' f s) = Store' (Store' f) s
-  --extend f (Store' g s) = Store' (\s' => f (Store' g s')) s
+  extend f (Store' g s) = Store' (\s' => f (Store' g s')) s
 
 VerifiedComonad (Store s) where
   extendExtractId (Store' f x) = Refl
-  extractExtendF (Store' g y) b f = ?hole
+  extractExtendF (Store' g y) f = Refl
   extendExtend (Store' x y) g f = Refl
 
 export
@@ -76,9 +55,7 @@ seeks f (Store' g s) = Store' g (f s)
 
 export
 experiment : Functor f => (s -> f s) -> Store s a -> f a
-experiment f (Store' g s) = g <$> f s
-
-
+experiment f w = map (`peek` w) (f (pos w))
 
 -- Local Variables:
 -- idris-load-packages: ("contrib")

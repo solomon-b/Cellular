@@ -1,7 +1,6 @@
 module Main
 
 import Data.Vect
-
 import Control.Comonad
 import Control.Comonad.Store
 
@@ -19,7 +18,7 @@ initialStore s = Store' (query s) 0
     query (x :: xs) Z = x
     query (x :: xs) (S i) = query xs i
 
-indices : Bounds -> Index -> List Index
+indices : (bounds : Nat) -> (index : Nat) -> List Nat
 indices (S bounds) Z = [bounds, 0, 1]
 indices bounds (S k) =
   if pred bounds == (S k)
@@ -27,25 +26,25 @@ indices bounds (S k) =
   else [k, S k, S (S k)]
 
 neighbors : Bounds -> Store Index Bool -> List Bool
-neighbors n = experiment (indices n)
+neighbors bounds = experiment (indices bounds)
 
 isAlive : Bounds -> Store Index Bool -> Bool
-isAlive n s =
-  case neighbors n s of
+isAlive bounds s =
+  case neighbors bounds s of
     [False, False, False] => False
     [True, False, False] => False
     [True, True, True] => False
     _ => True
 
 nextGen : Bounds -> Store Index Bool -> Store Index Bool
-nextGen n = extend (isAlive n)
+nextGen bounds = extend (isAlive bounds)
 
 runAutomata : Bounds -> Store Index Bool -> List (List Bool)
-runAutomata (S n) s =
-  let curr = flip peek s <$> [0..n]
+runAutomata bounds s =
+  let curr = experiment (const [0..pred bounds]) s
   in if all id curr || all not curr
      then [curr]
-     else curr :: runAutomata n (nextGen n s)
+     else curr :: runAutomata bounds (nextGen bounds s)
 
 printState : List Bool -> IO ()
 printState xs = do
@@ -53,7 +52,7 @@ printState xs = do
   putStrLn ""
 
 main : IO ()
-main = traverse printState (runAutomata startLength init) *> pure ()
+main = traverse_ printState (runAutomata startLength init)
   where
    start : Vect 3 Bool
    start = [False, False, True]
@@ -62,3 +61,12 @@ main = traverse printState (runAutomata startLength init) *> pure ()
    init : Store Index Bool
    init = initialStore start
 
+s : Store Index Bool
+s = nextGen 3 $ nextGen 3 $ initialStore [False, False, True]
+
+xs : List Nat
+xs = [0,1,2]
+
+-- Local Variables:
+-- idris-load-packages: ("contrib")
+-- End:
