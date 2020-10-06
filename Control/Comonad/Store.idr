@@ -3,7 +3,6 @@ module Control.Comonad.Store
 import Interfaces.Verified
 import Control.Comonad
 
---cong : {f : t -> u} -> (a = b) -> f a = f b
 cong2 : {f : t -> u -> v} -> (a1 = a2) -> b1 = b2 -> f a1 b1 = f a2 b2
 cong2 Refl Refl = Refl
 
@@ -48,6 +47,15 @@ peeks f (Store' g s) = g $ f s
 export
 seek : s -> Store s a -> Store s a
 seek s (Store' f _) = Store' f s
+
+--cong : {f : t -> u} -> (a = b) -> f a = f b
+-- seek s = peek s . duplicate
+--seekDuplicateLaw :
+--  {s, a : Type} ->
+--  (s' : s) ->
+-- (store : Store s a) ->
+--  seek s' store = (peek s' . duplicate) store
+--seekDuplicateLaw s' (Store' f x) = ?hole
 
 export
 seeks : (s -> s) -> Store s a -> Store s a

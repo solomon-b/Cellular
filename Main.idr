@@ -4,6 +4,26 @@ import Data.Vect
 import Control.Comonad
 import Control.Comonad.Store
 
+--n - k - 1
+--complement : Fin n -> (Fin n)
+--complement FZ {n = (S k)} = ?hole_1
+--complement (FS x) {n = (S k)} = ?hole_2
+
+initialStore' : Vect (S k) Bool -> Store (Fin (S k)) Bool
+initialStore' v = Store' (flip Data.Vect.index v) FZ
+
+indices' : Fin n -> Vect 3 (Fin n)
+indices' FZ {n = (S k)} = [last, FZ, FZ]
+indices' (FS x) {n = (S k)} = ?hole_2
+  --case Data.Fin.finToNat i of
+  --  Z => [n, 0, 1]
+  --  (S k) => if pred n == S k
+  --           then [k, S k, 0]
+  --           else [k, S k, S (S k)]
+
+neighbors' : Store (Fin n) Bool -> Vect 3 Bool
+neighbors' = experiment indices'
+
 Index : Type
 Index = Nat
 
@@ -62,10 +82,8 @@ main = traverse_ printState (runAutomata startLength init)
    init = initialStore start
 
 s : Store Index Bool
-s = nextGen 3 $ nextGen 3 $ initialStore [False, False, True]
+s = initialStore [False, False, True]
 
-xs : List Nat
-xs = [0,1,2]
 
 -- Local Variables:
 -- idris-load-packages: ("contrib")
