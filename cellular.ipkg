@@ -1,2 +1,10 @@
 package cellular
 
+sourcedir = "src/"
+modules = Main
+        , Control.Comonad.Store
+        , Data.Representable
+
+main = Main
+
+pkgs = base, contrib
