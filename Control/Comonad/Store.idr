@@ -1,5 +1,6 @@
 module Control.Comonad.Store
 
+import Syntax.PreorderReasoning
 import Interfaces.Verified
 import Control.Comonad
 
@@ -40,6 +41,14 @@ export
 peek : s -> Store s a -> a
 peek s (Store' f s') = f s
 
+-- peek x . extend (peek y) = peek y
+peekExtendLaw :
+  {s, a : Type} ->
+  (x, y : s) ->
+  (store : Store s a) ->
+  peek x ((extend (peek y)) store) = peek y store
+peekExtendLaw x y (Store' f z) = Refl
+
 export
 peeks : (s -> s) -> Store s a -> a
 peeks f (Store' g s) = g $ f s
@@ -48,18 +57,25 @@ export
 seek : s -> Store s a -> Store s a
 seek s (Store' f _) = Store' f s
 
---cong : {f : t -> u} -> (a = b) -> f a = f b
 -- seek s = peek s . duplicate
---seekDuplicateLaw :
---  {s, a : Type} ->
---  (s' : s) ->
--- (store : Store s a) ->
---  seek s' store = (peek s' . duplicate) store
---seekDuplicateLaw s' (Store' f x) = ?hole
+seekDuplicateLaw :
+  {s, a : Type} ->
+  (s' : s) ->
+ (store : Store s a) ->
+  seek s' store = peek s' (duplicate store)
+seekDuplicateLaw s' (Store' f x) = Refl
 
 export
 seeks : (s -> s) -> Store s a -> Store s a
 seeks f (Store' g s) = Store' g (f s)
+
+--seeks f = peeks f . duplicate
+seeksDuplicateLaw :
+  {s, a : Type} ->
+  (f : s -> s) ->
+  (store : Store s a) ->
+  seeks f store = peeks f (duplicate store)
+seeksDuplicateLaw f (Store' g x) = Refl
 
 export
 experiment : Functor f => (s -> f s) -> Store s a -> f a

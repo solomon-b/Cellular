@@ -9,20 +9,48 @@ import Control.Comonad.Store
 --complement FZ {n = (S k)} = ?hole_1
 --complement (FS x) {n = (S k)} = ?hole_2
 
-initialStore' : Vect (S k) Bool -> Store (Fin (S k)) Bool
+initialStore' : Vect (3 + k) Bool -> Store (Fin (3 + k)) Bool
 initialStore' v = Store' (flip Data.Vect.index v) FZ
 
-indices' : Fin n -> Vect 3 (Fin n)
-indices' FZ {n = (S k)} = [last, FZ, FZ]
-indices' (FS x) {n = (S k)} = ?hole_2
-  --case Data.Fin.finToNat i of
-  --  Z => [n, 0, 1]
-  --  (S k) => if pred n == S k
-  --           then [k, S k, 0]
-  --           else [k, S k, S (S k)]
+downFin : Fin (S k ) -> Fin (S k)
+downFin FZ = last
+downFin (FS k) = weaken k
 
-neighbors' : Store (Fin n) Bool -> Vect 3 Bool
+upFin : Fin (S k) -> Fin (S k)
+upFin = either (const FZ) FS . strengthen
+
+indices' : Fin (3 + k) -> Vect 3 (Fin (3 + k))
+indices' x = [downFin x, x, upFin x]
+
+neighbors' : Store (Fin (3 + k)) Bool -> Vect 3 Bool
 neighbors' = experiment indices'
+
+isAlive' : Store (Fin (3 + k)) Bool -> Bool
+isAlive' s =
+  case neighbors' s of
+    [False, False, False] => False
+    [True, False, False] => False
+    [True, True, True] => False
+    _ => True
+
+nextGen' : Store (Fin (3 + k)) Bool -> Store (Fin (3 + k)) Bool
+nextGen' = extend isAlive'
+
+allFins : Vect k (Fin k)
+allFins {k = Z} = []
+allFins {k = (S k)} = FZ :: map FS (allFins {k=k})
+
+x : Vect 3 (Fin 3)
+x = allFins
+
+runAutomata' : Store (Fin (3 + k)) Bool -> List (Vect (3 + k) Bool)
+runAutomata' s {k} =
+  if all id curr || all not curr
+     then [curr]
+     else curr :: runAutomata' (nextGen' s)
+  where
+    curr : Vect (3 + k) Bool
+    curr = experiment (const allFins) s
 
 Index : Type
 Index = Nat
@@ -66,20 +94,18 @@ runAutomata bounds s =
      then [curr]
      else curr :: runAutomata bounds (nextGen bounds s)
 
-printState : List Bool -> IO ()
+printState : (Vect (3 + k)) Bool -> IO ()
 printState xs = do
   traverse (putStr . show) xs
   putStrLn ""
 
 main : IO ()
-main = traverse_ printState (runAutomata startLength init)
+main = traverse_ printState (runAutomata' init)
   where
    start : Vect 3 Bool
    start = [False, False, True]
-   startLength : Nat
-   startLength = Data.Vect.length start
-   init : Store Index Bool
-   init = initialStore start
+   init : Store (Fin 3) Bool
+   init = initialStore' start
 
 s : Store Index Bool
 s = initialStore [False, False, True]
