@@ -4,11 +4,6 @@ import Data.Vect
 import Control.Comonad
 import Control.Comonad.Store
 
---n - k - 1
---complement : Fin n -> (Fin n)
---complement FZ {n = (S k)} = ?hole_1
---complement (FS x) {n = (S k)} = ?hole_2
-
 initialStore' : Vect (3 + k) Bool -> Store (Fin (3 + k)) Bool
 initialStore' v = Store' (flip Data.Vect.index v) FZ
 
@@ -109,8 +104,3 @@ main = traverse_ printState (runAutomata' init)
 
 s : Store Index Bool
 s = initialStore [False, False, True]
-
-
--- Local Variables:
--- idris-load-packages: ("contrib")
--- End:

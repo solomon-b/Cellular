@@ -2,6 +2,7 @@ package cellular
 
 sourcedir = "src/"
 modules = Main
+        , Control.Comonad
         , Control.Comonad.Store
         , Data.Representable
 
