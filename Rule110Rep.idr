@@ -53,11 +53,11 @@ printState xs = do
 main : IO ()
 main = traverse_ printState (runAutomata init)
   where
-   start : Vect 14 Bool
-   start = map (\i => if i == 0 then False else True) [0,0,0,1,0,0,1,1,0,1,1,1,1,1]
-   init : Store (Vect 14) (Fin 14) Bool
-   init = initialStore start
-   --start : Vect 3 Bool
-   --start = map (\i => if i == 0 then False else True) [0, 0, 1]
-   --init : Store (Vect 3) (Fin 3) Bool
+   --start : Vect 14 Bool
+   --start = map (\i => if i == 0 then False else True) [0,0,0,1,0,0,1,1,0,1,1,1,1,1]
+   --init : Store (Vect 14) (Fin 14) Bool
    --init = initialStore start
+   start : Vect 3 Bool
+   start = map (\i => if i == 0 then False else True) [0, 0, 1]
+   init : Store (Vect 3) (Fin 3) Bool
+   init = initialStore start
