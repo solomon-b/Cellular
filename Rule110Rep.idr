@@ -49,7 +49,7 @@ runAutomata : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> IO ()
 runAutomata s {k} =
   if all id curr || all not curr
      then printState curr
-     else printState curr *> runAutomata (nextGen s)
+     else printState curr >>= \_ => runAutomata (nextGen s)
   where
     curr : Vect (3 + k) Bool
     curr = experiment (const allFins) s
