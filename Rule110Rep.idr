@@ -2,10 +2,11 @@ module Main
 
 import Data.Vect
 import Control.Comonad
-import Control.Comonad.Store
+import Data.Representable
+import Data.Representable.Store
 
-initialStore : Vect (3 + k) Bool -> Store (Fin (3 + k)) Bool
-initialStore v = Store' (flip Data.Vect.index v) FZ
+initialStore : Vect (3 + k) Bool -> Store (Vect (3 + k)) (Fin (3 + k)) Bool
+initialStore xs {k} = MkStore FZ xs
 
 down : Fin (S k ) -> Fin (S k)
 down FZ = last
@@ -17,10 +18,10 @@ up = either (const FZ) FS . strengthen
 indices : Fin (3 + k) -> Vect 3 (Fin (3 + k))
 indices x = [down x, x, up x]
 
-neighbors : Store (Fin (3 + k)) Bool -> Vect 3 Bool
+neighbors : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> Vect 3 Bool
 neighbors = experiment indices
 
-isAlive : Store (Fin (3 + k)) Bool -> Bool
+isAlive : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> Bool
 isAlive s =
   case neighbors s of
     [False, False, False] => False
@@ -28,17 +29,14 @@ isAlive s =
     [True, True, True] => False
     _ => True
 
-nextGen : Store (Fin (3 + k)) Bool -> Store (Fin (3 + k)) Bool
+nextGen : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> Store (Vect (3 + k)) (Fin (3 + k)) Bool
 nextGen = extend isAlive
 
 allFins : Vect k (Fin k)
 allFins {k = Z} = []
 allFins {k = (S k)} = FZ :: map FS (allFins {k=k})
 
-x : Vect 3 (Fin 3)
-x = allFins
-
-runAutomata : Store (Fin (3 + k)) Bool -> List (Vect (3 + k) Bool)
+runAutomata : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> List (Vect (3 + k) Bool)
 runAutomata s {k} =
   if all id curr || all not curr
      then [curr]
@@ -55,7 +53,11 @@ printState xs = do
 main : IO ()
 main = traverse_ printState (runAutomata init)
   where
-   start : Vect 3 Bool
-   start = [False, False, True]
-   init : Store (Fin 3) Bool
+   start : Vect 14 Bool
+   start = map (\i => if i == 0 then False else True) [0,0,0,1,0,0,1,1,0,1,1,1,1,1]
+   init : Store (Vect 14) (Fin 14) Bool
    init = initialStore start
+   --start : Vect 3 Bool
+   --start = map (\i => if i == 0 then False else True) [0, 0, 1]
+   --init : Store (Vect 3) (Fin 3) Bool
+   --init = initialStore start
