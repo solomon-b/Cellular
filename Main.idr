@@ -7,15 +7,15 @@ import Control.Comonad.Store
 initialStore : Vect (3 + k) Bool -> Store (Fin (3 + k)) Bool
 initialStore v = Store' (flip Data.Vect.index v) FZ
 
-downFin : Fin (S k ) -> Fin (S k)
-downFin FZ = last
-downFin (FS k) = weaken k
+down : Fin (S k ) -> Fin (S k)
+down FZ = last
+down (FS k) = weaken k
 
-upFin : Fin (S k) -> Fin (S k)
-upFin = either (const FZ) FS . strengthen
+up : Fin (S k) -> Fin (S k)
+up = either (const FZ) FS . strengthen
 
 indices : Fin (3 + k) -> Vect 3 (Fin (3 + k))
-indices x = [downFin x, x, upFin x]
+indices x = [down x, x, up x]
 
 neighbors : Store (Fin (3 + k)) Bool -> Vect 3 Bool
 neighbors = experiment indices
