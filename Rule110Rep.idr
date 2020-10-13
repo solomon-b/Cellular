@@ -32,9 +32,9 @@ isAlive s =
 nextGen : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> Store (Vect (3 + k)) (Fin (3 + k)) Bool
 nextGen = extend isAlive
 
-allFins : Vect k (Fin k)
-allFins {k = Z} = []
-allFins {k = (S k)} = FZ :: map FS (allFins {k=k})
+universe : Vect k (Fin k)
+universe {k = Z} = []
+universe {k = (S k)} = FZ :: map FS (universe {k=k})
 
 boolToString : Bool -> String
 boolToString False = "0"
@@ -52,7 +52,7 @@ runAutomata s {k} =
      else printState curr >>= \_ => runAutomata (nextGen s)
   where
     curr : Vect (3 + k) Bool
-    curr = experiment (const allFins) s
+    curr = experiment (const universe) s
 
 main : IO ()
 main = runAutomata init
