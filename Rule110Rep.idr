@@ -45,23 +45,19 @@ printState xs = do
   traverse_ (putStr . boolToString) $ toList xs
   putStrLn ""
 
-runAutomata : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> IO ()
-runAutomata s {k} =
+runSimulation : Store (Vect (3 + k)) (Fin (3 + k)) Bool -> IO ()
+runSimulation s {k} =
   if all id curr || all not curr
      then printState curr
-     else printState curr >>= \_ => runAutomata (nextGen s)
+     else printState curr >>= \_ => runSimulation (nextGen s)
   where
     curr : Vect (3 + k) Bool
     curr = experiment (const universe) s
 
 main : IO ()
-main = runAutomata init
+main = runSimulation init
   where
    start : Vect 14 Bool
    start = map (\i => if i == 0 then False else True) [0,0,0,1,0,0,1,1,0,1,1,1,1,1]
    init : Store (Vect 14) (Fin 14) Bool
    init = initialStore start
-   --start : Vect 3 Bool
-   --start = map (\i => if i == 0 then False else True) [0, 0, 1]
-   --init : Store (Vect 3) (Fin 3) Bool
-   --init = initialStore start
